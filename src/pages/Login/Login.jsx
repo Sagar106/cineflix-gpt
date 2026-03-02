@@ -3,6 +3,11 @@ import Header from "../../components/Header";
 import { bgImage } from "../../constants/constants";
 import { useRef } from "react";
 import { checkValidation } from "../../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../../configs/firebase";
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -15,12 +20,53 @@ const Login = () => {
   };
 
   const handleSignInClick = () => {
+    console.log("inside signin/signup");
     const message = checkValidation(
       email.current.value,
       password.current.value,
     );
 
     setErrorMessage(message);
+
+    if (message.email || message.password) return;
+
+    if (!isSignIn) {
+      // Sign up
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value,
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode);
+          console.log(errorMessage);
+        });
+    } else {
+      // Sign In
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value,
+      )
+        .then((userCredential) => {
+          //Signed in
+          const user = userCredential.user;
+          console.log("Signed In User", user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode);
+          console.log(errorMessage);
+        });
+    }
   };
 
   return (
